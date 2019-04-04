@@ -4,27 +4,38 @@ from pydub import AudioSegment
 from python_speech_features import mfcc
 import numpy as np
 import glob
+import sounddevice as sd
+import pickle
+from time import sleep
+
+MODEL_PICKLE_FILE_NAME = "model.pickle"
+MIN_SILENCE_MS = 500  # milliseconds
+SILENCE_THRESHOLD_DB = 32  # decibels
 
 
-def prepare():
+def prepare(play=False):
     training_data = []
 
-    sound_filenames = glob.glob("data/audio/*.wav")
-    for fn in sound_filenames:
-        sound_file = AudioSegment.from_wav(fn)
+    audio_filenames = glob.glob("data/audio/*.wav")
+    for fn in audio_filenames:
+        audio_file = AudioSegment.from_wav(fn)
         audio_chunks = split_on_silence(
-            sound_file,
-            min_silence_len=50,  # milliseconds
-            silence_thresh=-32  # decibels
+            audio_file,
+            min_silence_len=MIN_SILENCE_MS,
+            silence_thresh=-SILENCE_THRESHOLD_DB
         )
 
         label_name = fn.split("/")[-1].split(".")[0]
 
-        for audio in audio_chunks:
+        for i, audio in enumerate(audio_chunks):
             np_audio = np.frombuffer(audio.raw_data, np.int32)
             features = mfcc(np_audio, audio.frame_rate)
             features = features[:10, :]
             # print(features.shape)
+            print("{}: {}".format(i+1, label_name))
+
+            if play:
+                sd.play(np_audio, audio.frame_rate, blocking=True)
 
             training_data.append({
                 "label": label_name,
@@ -45,26 +56,50 @@ def train(data):
 
     print(score)
 
+    pickle.dump(model, open(MODEL_PICKLE_FILE_NAME, 'wb'))
+
     return model
 
 
-def test(model, test_sound):
+def test(model, test_audio, play=False):
     predicted = []
-    # parse test_sound into sound_chunks
-    # for each chunk
-    #   convert chunk raw data to np array
-    #   extract mfcc features of chunk np array
-    #   predict features and determine class
-    #   generate array of features and classes
-    # return features/classes array
+
+    audio_chunks = split_on_silence(
+        test_audio,
+        min_silence_len=MIN_SILENCE_MS,
+        silence_thresh=-SILENCE_THRESHOLD_DB
+    )
+
+    for audio in audio_chunks:
+        np_audio = np.frombuffer(audio.raw_data, np.int32)
+
+        if play:
+            sd.play(np_audio, audio.frame_rate, blocking=True)
+            sleep(1)
+
+        features = mfcc(np_audio, audio.frame_rate)
+        features = features[:10, :]
+
+        X = features.reshape(10 * 13)
+        _y = model.predict(X)
+
+        print(_y)
+
+        predicted.append(_y)
+
     return predicted
 
 
-def main():
-    training_data = prepare()
-    trained_model = train(training_data)
-    predicted_values = test(trained_model, object)
+def main(retrain=False):
+    if retrain:
+        training_data = prepare(play=True)
+        trained_model = train(training_data)
+    else:
+        trained_model = pickle.load(open(MODEL_PICKLE_FILE_NAME, 'rb'))
+
+    audio = AudioSegment.from_wav("data/audio/test/beautiful_dream.wav")
+    predicted_values = test(trained_model, audio, play=True)
 
 
 if __name__ == '__main__':
-    main()
+    main(retrain=False)
