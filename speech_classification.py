@@ -7,7 +7,7 @@ import glob
 
 
 def prepare():
-    trainint_data = []
+    training_data = []
 
     sound_filenames = glob.glob("data/audio/*.wav")
     for fn in sound_filenames:
@@ -26,13 +26,13 @@ def prepare():
             features = features[:10, :]
             # print(features.shape)
 
-            trainint_data.append({
+            training_data.append({
                 "label": label_name,
                 "features": features,
                 "audio": audio
             })
 
-    return trainint_data
+    return training_data
 
 
 def train(data):
