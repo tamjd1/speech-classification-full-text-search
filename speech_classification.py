@@ -31,8 +31,8 @@ def prepare(play=False):
         for i, audio in enumerate(audio_chunks):
             np_audio = np.frombuffer(audio.raw_data, np.int32)
             features = mfcc(np_audio, audio.frame_rate)
-            features = features[:10, :]
-            # print(features.shape)
+            features = features[:20, :]
+            features = features.reshape(features.shape[0] * features.shape[1])
             print("{}: {}".format(i+1, label_name))
 
             if play:
@@ -48,7 +48,7 @@ def prepare(play=False):
 
 
 def train(data):
-    X = np.array([_["features"].reshape(10*13) for _ in data])
+    X = np.array([_["features"] for _ in data])
     y = np.array([_["label"] for _ in data])
 
     model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial')
@@ -79,9 +79,9 @@ def test(model, test_audio, play=False):
             sleep(1)
 
         features = mfcc(np_audio, audio.frame_rate)
-        features = features[:10, :]
+        features = features[:20, :]
 
-        X = features.reshape(10 * 13)
+        X = features.reshape(features.shape[0] * features.shape[1])
         _y = model.predict(X)
 
         print(_y)
@@ -106,3 +106,4 @@ def main(retrain=False):
 if __name__ == '__main__':
     # todo : train on "light" again
     main(retrain=False)
+
