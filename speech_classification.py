@@ -9,7 +9,7 @@ import pickle
 from time import sleep
 
 MODEL_PICKLE_FILE_NAME = "model.pickle"
-MIN_SILENCE_MS = 500  # milliseconds
+MIN_SILENCE_MS = 1000  # milliseconds
 SILENCE_THRESHOLD_DB = 32  # decibels
 
 
@@ -18,6 +18,7 @@ def prepare(play=False):
 
     audio_filenames = glob.glob("data/audio/*.wav")
     for fn in audio_filenames:
+        print(fn)
         audio_file = AudioSegment.from_wav(fn)
         audio_chunks = split_on_silence(
             audio_file,
@@ -92,14 +93,16 @@ def test(model, test_audio, play=False):
 
 def main(retrain=False):
     if retrain:
-        training_data = prepare(play=True)
+        training_data = prepare(play=False)
         trained_model = train(training_data)
     else:
         trained_model = pickle.load(open(MODEL_PICKLE_FILE_NAME, 'rb'))
 
-    audio = AudioSegment.from_wav("data/audio/test/beautiful_dream.wav")
+    audio = AudioSegment.from_wav("data/audio/test/love_and_light.wav")
     predicted_values = test(trained_model, audio, play=True)
+    print(predicted_values)
 
 
 if __name__ == '__main__':
+    # todo : train on "light" again
     main(retrain=False)
