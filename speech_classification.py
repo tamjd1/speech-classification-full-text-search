@@ -7,6 +7,10 @@ import glob
 import sounddevice as sd
 import pickle
 from time import sleep
+import os
+import sys
+f = open(os.devnull, 'w')
+sys.stderr = f
 
 MODEL_PICKLE_FILE_NAME = "model.pickle"
 MIN_SILENCE_MS = 1000  # milliseconds
@@ -59,10 +63,11 @@ def train(data):
 
     pickle.dump(model, open(MODEL_PICKLE_FILE_NAME, 'wb'))
 
-    return model
 
+def predict(test_audio, play=False):
 
-def test(model, test_audio, play=False):
+    model = pickle.load(open(MODEL_PICKLE_FILE_NAME, 'rb'))
+
     predicted = []
 
     audio_chunks = split_on_silence(
@@ -73,37 +78,17 @@ def test(model, test_audio, play=False):
 
     for audio in audio_chunks:
         np_audio = np.frombuffer(audio.raw_data, np.int32)
-
-        if play:
-            sd.play(np_audio, audio.frame_rate, blocking=True)
-            sleep(1)
-
         features = mfcc(np_audio, audio.frame_rate)
         features = features[:20, :]
 
         X = features.reshape(features.shape[0] * features.shape[1])
         _y = model.predict(X)
 
-        print(_y)
+        if play:
+            print("Predicted word: {}".format(_y))
+            sd.play(np_audio, audio.frame_rate, blocking=True)
+            sleep(1)
 
-        predicted.append(_y)
+        predicted.append(_y[0])
 
-    return predicted
-
-
-def main(retrain=False):
-    if retrain:
-        training_data = prepare(play=False)
-        trained_model = train(training_data)
-    else:
-        trained_model = pickle.load(open(MODEL_PICKLE_FILE_NAME, 'rb'))
-
-    audio = AudioSegment.from_wav("data/audio/test/love_and_light.wav")
-    predicted_values = test(trained_model, audio, play=True)
-    print(predicted_values)
-
-
-if __name__ == '__main__':
-    # todo : train on "light" again
-    main(retrain=False)
-
+    return " ".join(predicted)
