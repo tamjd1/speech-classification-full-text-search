@@ -81,8 +81,6 @@ The application process is as follows:
 ```buildoutcfg
 Data pre-processing started...
 Parsing audio from file: data/audio/breakfast.wav
-Parsing audio from file: data/audio/morning.wav
-...
 Data pre-processing completed
 ```
 
