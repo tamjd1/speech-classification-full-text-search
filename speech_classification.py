@@ -23,7 +23,7 @@ def prepare(play=False):
     :param play: flag to play the audio that is being used for training
     :return: list of training data and labels
     """
-    training_data = []
+    data = []
 
     # get all training audio file names
     audio_filenames = glob.glob("data/audio/*.wav")
@@ -58,13 +58,13 @@ def prepare(play=False):
                 sd.play(np_audio, audio.frame_rate, blocking=True)
 
             # append label, mfcc features, and audio to the list of training data
-            training_data.append({
+            data.append({
                 "label": label_name,
                 "features": features,
                 "audio": audio
             })
 
-    return training_data
+    return data
 
 
 def train(data):
