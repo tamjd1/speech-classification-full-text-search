@@ -46,14 +46,18 @@ After the `Python` environment has been set up and all the dependencies have bee
 The entrypoint of the application is the `main()` function in the script called `voice_enabled_search.py`. To execute the script, run the following command in the terminal:
 
 ```buildoutcfg
-python voice_enabled_search.py
-```  
+python voice_enabled_search.py --search_term breakfast --train true
+```
 
-If using an IDE, e.g. PyCharm, the script can also be executed within the IDE.
+Or if training is not required:
 
-The output will be sent to `stdout` and will be visible in the terminal if run in the CLI or within the IDE if run in the IDE.
+```buildoutcfg
+python voice_enabled_search.py --search_term breakfast
+```
 
-*Note:* the first time the application is executed, the `train` flag in the `main()` method needs to be set to `True` in order for the speech classification model to be trained and be ready for predictions.
+The output will be sent to `stdout` and will be visible in the terminal.
+
+*Note:* the first time the application is executed, the `train` flag needs to be set to `True` in order for the speech classification model to be trained and be ready for predictions.
 
 
 ### Program Flow
