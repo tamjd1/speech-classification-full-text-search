@@ -74,6 +74,7 @@ The application process is as follows:
     3. return the documents with scores greater than zero, sorted by highest to lowest
 4. The returned documents are then printed to `stdout` along with the intended and predicted search terms
 
+![flowchart](flowchart.png)
 
 ### Sample Output
 
