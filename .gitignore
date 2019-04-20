@@ -3,3 +3,4 @@
 *.pickle
 data/audio/*
 .cache
+*pdf
