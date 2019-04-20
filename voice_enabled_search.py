@@ -34,7 +34,7 @@ def voice_to_text_search(audio_search_term, text_search_term):
         print("\nNo documents were found containing \"{}\":".format(predicted_search_term))
 
 
-def main(train=False):
+def main(train=False, search_term=None):
     if train:
         # the first time this application runs this flag
         #   needs to be set to True so the speech classification model
@@ -42,19 +42,26 @@ def main(train=False):
         training_data = sc.prepare(play=False)
         sc.train(training_data)
 
-    # get all the testing files
-    audio_filenames = glob.glob("data/audio/test/*.wav")
+    filename = search_term if search_term else "*"
 
-    for i, fn in enumerate(audio_filenames):
+    # get all the testing files
+    audio_filenames = glob.glob("data/audio/test/{}.wav".format(filename))
+
+    for fn in audio_filenames:
         # for each test file, use it to do full text search on the CORPUS
-        print("\n---------- TEST {} ----------\n".format(i + 1))
+        print("\n---------------------------\n")
         audio_file = AudioSegment.from_wav(fn)
         label_name = fn.split("/")[-1].split(".")[0]
         audio_text = " ".join(label_name.split("_"))
         voice_to_text_search(audio_file, audio_text)
+        print("\n---------------------------\n")
 
 
 if __name__ == '__main__':
-    # todo : train on "light" again
-    # todo : train on words which don't exist in the CORPUS
-    main(True)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train')
+    parser.add_argument('--search_term')
+    args = parser.parse_args()
+
+    main(train=args.train, search_term=args.search_term)
