@@ -23,6 +23,7 @@ def prepare(play=False):
     :param play: flag to play the audio that is being used for training
     :return: list of training data and labels
     """
+    print("Data pre-processing started...")
     data = []
 
     # get all training audio file names
@@ -30,7 +31,7 @@ def prepare(play=False):
     for fn in audio_filenames:
         # for each file split the audio into chunks each of which contain
         # one utterance of the spoken word (each file contains multiple utterances of the same word)
-        print(fn)
+        print("Parsing audio from file: {}".format(fn))
         audio_file = AudioSegment.from_wav(fn)
         audio_chunks = split_on_silence(
             audio_file,
@@ -50,12 +51,13 @@ def prepare(play=False):
             features = mfcc(np_audio, audio.frame_rate)
             features = features[:20, :]
             features = features.reshape(features.shape[0] * features.shape[1])
-            print("{}: {}".format(i+1, label_name))
 
             if play:
                 # play the audio file if the flag is set to True
                 # for debugging purposes
+                print("{}: {}".format(i + 1, label_name))
                 sd.play(np_audio, audio.frame_rate, blocking=True)
+                sleep(1)
 
             # append label, mfcc features, and audio to the list of training data
             data.append({
@@ -63,6 +65,8 @@ def prepare(play=False):
                 "features": features,
                 "audio": audio
             })
+
+    print("Data pre-processing completed")
 
     return data
 
@@ -84,10 +88,11 @@ def train(data):
 
     # determine and print the score to verify quality of training
     score = model.score(X, y)
-    print(score)
+    print("Model trained with accuracy score on training data of {}".format(score))
 
     # pickle and save the model so it can be used in the future
     # without having to retrain
+    print("Saving the trained model object to {}".format(MODEL_PICKLE_FILE_NAME))
     pickle.dump(model, open(MODEL_PICKLE_FILE_NAME, 'wb'))
 
 
@@ -113,9 +118,9 @@ def predict(test_audio, play=False):
 
     for audio in audio_chunks:
         # for each audio chunk (word)
-        # convert audio to np array
-        # retrieve its mfcc attributes
-        # resize to maintain uniformity with the training data
+        #   convert audio to np array
+        #   retrieve its mfcc attributes
+        #   resize to maintain uniformity with the training data
         np_audio = np.frombuffer(audio.raw_data, np.int32)
         features = mfcc(np_audio, audio.frame_rate)
         features = features[:20, :]

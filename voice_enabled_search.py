@@ -19,7 +19,7 @@ def voice_to_text_search(audio_search_term, text_search_term):
     :return: None
     """
 
-    print("Intended search term: \"{}\"".format(text_search_term))
+    print("Actual search term: \"{}\"".format(text_search_term))
 
     predicted_search_term = sc.predict(audio_search_term)
     print("Predicted search term: \"{}\"".format(predicted_search_term))
@@ -52,10 +52,9 @@ def main(train=False):
         label_name = fn.split("/")[-1].split(".")[0]
         audio_text = " ".join(label_name.split("_"))
         voice_to_text_search(audio_file, audio_text)
-        print("\n-----------------------------\n")
 
 
 if __name__ == '__main__':
     # todo : train on "light" again
     # todo : train on words which don't exist in the CORPUS
-    main()
+    main(True)
