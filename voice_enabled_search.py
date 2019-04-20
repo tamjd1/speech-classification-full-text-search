@@ -34,7 +34,14 @@ def voice_to_text_search(audio_search_term, text_search_term):
         print("\nNo documents were found containing \"{}\":".format(predicted_search_term))
 
 
-def main():
+def main(train=False):
+    if train:
+        # the first time this application runs this flag
+        #   needs to be set to True so the speech classification model
+        #   can be trained and be ready for predictions
+        training_data = sc.prepare(play=False)
+        sc.train(training_data)
+
     # get all the testing files
     audio_filenames = glob.glob("data/audio/test/*.wav")
 
