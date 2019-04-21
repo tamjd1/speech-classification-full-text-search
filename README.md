@@ -9,6 +9,10 @@ It involves a speech classification model which needs to be trained using the tr
 
 The algorithm that is used for speech classification is Logistic Regression classifier and for full text search analysis Term Frequency/Inverse Document Frequency (TF/IDF) scores are used to find the relevant documents.   
 
+Below is a high-level architecture diagram representing the data flow and communication between modules.
+
+![highlevel](high-level.png)
+
 
 ### Training and Testing Data
 This application makes use of two kinds of data sets:
